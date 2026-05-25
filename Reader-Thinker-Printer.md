@@ -1,6 +1,17 @@
 # Reader-Thinker-Printer
 > A Parallel Thinker With Arbitary Input And Output Sizes.
 
+Architecture:
+
+|             |                          |                  |
+|-------------|--------------------------|------------------|
+|       ╭─      | Recurrent Neural Network |       ─╮           |
+|       │       |                          |       │            |
+|       ▼     |                          |      ▼           |
+| AutoEncoder |                          | Residual Network | 
+|             | Recurrent Neural Network |                  |
+
+
 INPUT TEXT (Serial Stream)
       │
       ▼
