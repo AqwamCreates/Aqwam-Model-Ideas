@@ -3,30 +3,29 @@
 
 Architecture:
 
-+----------+----------------------+------------------------------------------+-------------------------------------------------------+
 | STAGE    | COMPONENT            | FUNCTION                                 | DATA FLOW VISUALIZATION                               |
-+----------+----------------------+------------------------------------------+-------------------------------------------------------+
+|----------|----------------------|------------------------------------------|-------------------------------------------------------|
 | 1. IN    | Input RNN            | Reads serial text; compresses history    | Text --> [RNN] --> H_in (Hidden State)                |
 |          |                      | into a single hidden state vector.       |                                                       |
-+----------+----------------------+------------------------------------------+-------------------------------------------------------+
+|----------|----------------------|------------------------------------------|-------------------------------------------------------|
 | 2. SPLIT | ResNet Link (Pre)    | THE FORK: Splits H_in into two paths:    | H_in splits here:                                     |
 |          |                      | 1. Logic Path (to AE)                    |   |---> Path A: Goes to Autoencoder                   |
 |          |                      | 2. Highway Path (Skip Connection)        |   |---> Path B: Skips directly to Merger              |
-+----------+----------------------+------------------------------------------+-------------------------------------------------------+
+|----------|----------------------|------------------------------------------|-------------------------------------------------------|
 | 3. THINK | Autoencoder          | THE BRAIN: Transforms logic in parallel. | [Autoencoder]                                         |
 |          |                      | Converts Problem Vector -> Solution      | Takes Path A, outputs Z_out (Solution Plan).          |
 |          |                      | Vector. No time steps.                   |                                                       |
-+----------+----------------------+------------------------------------------+-------------------------------------------------------+
-| 4. MERGE | ResNet Link (Post)  | THE FUSION: Combines New Logic + Raw      | Z_out (from AE)                                       |
-|          |                      | Context (from Skip).                     |       +                                               |
+|----------|----------------------|------------------------------------------|-------------------------------------------------------|
+| 4. MERGE | ResNet Link (Post)   | THE FUSION: Combines New Logic | Raw     | Z_out (from AE)                                       |
+|          |                      | Context (from Skip).                     |       |                                               |
 |          |                      |                                          | Skip Data (from Path B)                               |
 |          |                      |                                          |       =                                               |
 |          |                      |                                          | Combined_State                                        |
-+----------+----------------------+------------------------------------------+-------------------------------------------------------+
+|----------|----------------------|------------------------------------------|-------------------------------------------------------|
 | 5. OUT   | Output RNN           | THE PRINTER: Generates text serially.    | Combined_State --> [RNN] --> Text                     |
 |          |                      | Receives Combined_State as CONSTANT      | (RNN sees full context at every single step)          |
 |          |                      | context at EVERY time step.              |                                                       |
-+----------+----------------------+------------------------------------------+-------------------------------------------------------+
+|----------|----------------------|------------------------------------------|-------------------------------------------------------|
 
 
 INPUT TEXT (Serial Stream)
@@ -59,7 +58,7 @@ INPUT TEXT (Serial Stream)
           │             │  (Element-wise Add or Concat)
           ▼             ▼
 ┌───────────────────────────────────────────────────────────────┐
-│  COMBINED STATE: [Z_out (Logic) + H_in (Raw Info)]            │
+│  COMBINED STATE: [Z_out (Logic) | H_in (Raw Info)]            │
 │  This is the input to the Output Stage.                       │
 └───────────────────────────┬───────────────────────────────────┘
                             │
@@ -68,7 +67,7 @@ INPUT TEXT (Serial Stream)
 │  PATH D: THE PRINTER (Output RNN)                             │
 │                                                               │
 │  At every time step t:                                        │
-│  Input = [Previous Token] + [COMBINED STATE]                  │
+│  Input = [Previous Token] | [COMBINED STATE]                  │
 │                                                               │
 │  The RNN generates tokens using BOTH the new logic plan       │
 │  AND the original raw context simultaneously.                 │
